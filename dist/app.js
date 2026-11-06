@@ -1,0 +1,7 @@
+const modal=document.querySelector('#modal'),content=document.querySelector('#modal-content');
+document.querySelectorAll('[data-wish]').forEach(button=>button.addEventListener('click',()=>{content.textContent=button.dataset.wish;modal.showModal()}));
+document.querySelectorAll('[data-photo]').forEach(button=>button.addEventListener('click',()=>{const image=button.querySelector('img').cloneNode();image.removeAttribute('loading');content.replaceChildren(image);modal.showModal()}));
+document.querySelector('.close').addEventListener('click',()=>modal.close());
+modal.addEventListener('click',event=>{if(event.target===modal){const bounds=modal.getBoundingClientRect();if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)modal.close()}});
+document.querySelector('#purr').addEventListener('click',()=>{document.querySelector('#cat-response').textContent='Мур-р-р… Нежность доставлена. Пума передаёт тебе обнимашки ♡'});
+document.querySelector('#celebrate').addEventListener('click',()=>{document.querySelector('#birthday-wish').textContent='Загадала? А теперь обнимаю. С днём рождения, моя родная ♡';if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;for(let i=0;i<45;i++){const heart=document.createElement('span');heart.className='confetti';heart.textContent=['♡','✧','·'][i%3];heart.style.left=Math.random()*100+'vw';heart.style.animationDelay=Math.random()*1.2+'s';document.body.append(heart);setTimeout(()=>heart.remove(),5500)}});
