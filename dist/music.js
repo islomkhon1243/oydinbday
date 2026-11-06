@@ -14,7 +14,7 @@
   const audio = new Audio(); audio.preload='metadata'; audio.volume=.45;
   const choice=player.querySelector('select'), play=player.querySelector('#music-play'), status=player.querySelector('#music-status'), progress=player.querySelector('.music-progress');
   tracks.forEach((track,i)=>choice.add(new Option(`${track.artist} — ${track.title}`,i)));
-  let index=0, wanted=true, blocked=false, revision=0, advancing=false, failed=new Set();
+  let index=0, wanted=false, blocked=false, revision=0, advancing=false, failed=new Set();
   const showStatus = text => { status.textContent=text; };
   function renderPlaying(){play.textContent=audio.paused?'▶':'Ⅱ';play.setAttribute('aria-label',audio.paused?'Включить музыку':'Приостановить музыку');player.classList.toggle('is-playing',!audio.paused);}
   async function tryPlay(){
@@ -46,9 +46,19 @@
   player.querySelector('#music-next').addEventListener('click',()=>loadTrack(index+1));
   choice.addEventListener('change',()=>loadTrack(Number(choice.value)));
   player.querySelector('#music-volume').addEventListener('input',event=>{audio.volume=Number(event.target.value);});
-  // Autoplay policies require a trusted gesture; an intentional pause stays paused.
-  function unlock(event){if(player.contains(event.target))return;if(wanted&&blocked)tryPlay();}
-  document.addEventListener('click',unlock);document.addEventListener('keydown',unlock);
-  loadTrack(0);
+  // Call play directly in the opening button's trusted gesture, without navigation.
+  loadTrack(0,false);
+  const welcome=document.createElement('dialog');
+  welcome.className='welcome-screen';welcome.setAttribute('aria-labelledby','welcome-title');
+  welcome.setAttribute('aria-describedby','welcome-description');
+  welcome.innerHTML=`<div class="welcome-card"><span class="welcome-star" aria-hidden="true">✧</span><div class="eyebrow">08 НОЯБРЯ · ТВОЙ ОСОБЕННЫЙ ДЕНЬ</div><div class="welcome-seal" aria-hidden="true">♡</div><h1 id="welcome-title">Ойдин,<br>это всё <em>для тебя.</em></h1><p id="welcome-description">Маленькое путешествие по тому,<br>как сильно ты любима.</p><button type="button" class="button" id="open-greeting" autofocus>Открыть поздравление <span aria-hidden="true">♡</span></button><p class="welcome-music">♫ Нажми — и начнётся твоя история с музыкой</p><span class="welcome-signature">С любовью, твой брат</span></div>`;
+  document.body.append(welcome);welcome.showModal();
+  welcome.addEventListener('cancel',event=>event.preventDefault());
+  welcome.querySelector('button').addEventListener('click',()=>{
+    wanted=true;blocked=false;tryPlay();
+    welcome.close();welcome.remove();document.body.classList.remove('intro-pending');
+    window.scrollTo({top:0,behavior:'instant'});
+    document.querySelector('.hero .button')?.focus({preventScroll:true});
+  },{once:true});
 })();
 
